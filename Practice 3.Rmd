@@ -1,0 +1,110 @@
+---
+title: "Basics of graphs"
+output: html_notebook
+---
+
+* Load the tidyverse
+
+
+Let's consider the following table (non real data)
+
+```{r}
+hours <- c(0.5, 1, 1.5, 2, 2.5, 3)
+
+improvement <- c( 12, 25, 40, 83, 120, 125)
+
+table_scz <- data.frame(hours, improvement)
+```
+
+```{r}
+table_scz
+```
+
+in which the improvement of negative symptoms in schizophrenia (in some arbitrary scale) is measure as a function of the hours per week that the patient practices aerobic exercise
+
+To make a plot with the data in the table we will use the function "ggplot"
+
+```{r}
+ggplot(data = table_scz, aes(x = hours, y = improvement)) +
+  geom_point()
+```
+
+How ggplot works: 
+
+- In the argument "data" you need to specify the table.
+
+- In the argument "x" you need to indicate which is the name of the column that contains the variable that you want to plot in the x-axis. 
+
+- In the argument "y" you need to indicate which is the name of the column that contains the variable that you want to plot in the y-axis. 
+
+- The "geom_point()" part indicates that we want to plot points. If for example, we want to plot lines instead, we can replace "geom_point()" with "geom_line()". Let's do it
+
+```{r}
+ggplot(data = table_scz, aes(x = hours, y = improvement)) +
+  geom_line()
+```
+
+We can also include both: "points" and "lines"
+
+```{r}
+ggplot(data = table_scz, aes(x = hours, y = improvement)) +
+  geom_point() +
+  geom_line() +
+  theme_minimal()
+```
+
+But instead of joining the dots with lines, we are going to plot the regression line. This is the way to do it in ggplot
+
+```{r}
+ggplot(data = table_scz, aes(x = hours, y = improvement)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = "y ~ x", se= FALSE) 
+```
+
+"lm" means linear model. 
+
+
+Finally, to change the limits of the axis we can use "xlim" and "ylim". For example:
+
+```{r}
+ggplot(data = table_scz, aes(x = hours, y = improvement)) +
+  geom_point() +
+  geom_smooth(method = "lm", formula = "y ~ x", se= FALSE) +
+  xlim(0, 4) +
+  ylim(0, 150)
+```
+
+* For the table "mpg", plot the "hwy" as a function of how big is the engine ("displ") and include a regression line. 
+
+
+## Different groups
+
+In ggplot is easy to plot different groups. Consider the "mpg" table. We first plot "cty" as a function of "hwy". 
+
+```{r}
+ggplot(data = mpg, aes(x = hwy, y = cty)) + 
+  geom_point()
+```
+
+If we want to include alsoinformation about the transmission ("trans"), we can use, for example, diffferent colors
+
+```{r}
+ggplot(data = mpg, aes(x = hwy, y = cty, color = trans)) + 
+  geom_point()
+```
+
+We can also use different panels
+
+```{r}
+ggplot(data = mpg, aes(x = hwy, y = cty)) + 
+  facet_wrap(~ trans) +
+  geom_point()
+```
+
+* For the table "mpg", plot the "hwy" as a function of how big is the engine ("displ") using different colors for different manufacturers.
+
+
+* Now use both color and different panels to present the data for different manufacturers.  
+
+
+

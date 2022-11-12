@@ -1,0 +1,177 @@
+---
+title: "Basic table manipulations"
+output: html_notebook
+---
+
+* Load the tidyverse
+
+The tidyverse includes some example tables. Let's consider the table "mpg"
+
+```{r}
+mpg
+```
+
+The table is too large, so only one part is shown in the notebook. To navigate to other columns you can use the black arrow. To navigate to other rows you can use the 1, 2, 3, ... symbols. 
+
+If you want to see the whole table, you can use "view"
+
+```{r}
+view(mpg)
+```
+
+In the table, each rows presents the data of a given car. This format is called a tidy table because each row corresponds to an observation and each column to a given variable (for example the column "cty" describes the fuel economy: means city miles per gallon). Tidy tables are often the best way to organize tables for data analysis. 
+
+To obtain information of a given data set or function you can do:
+
+```{r}
+?mpg
+```
+
+
+There are five main operations with tables: select, filter, mutate, summarise and group.
+
+## Select
+
+"select" select columns from a table
+
+```{r}
+select(mpg, year)
+```
+
+* Select the column "cty".
+
+It is possible to select more than one column
+
+```{r}
+select(mpg, year, drv)
+```
+
+Typically you would like to assign the new table with the selected columns to a new variable
+
+```{r}
+mpg_reduced <- select(mpg, year, drv)
+```
+
+* Explore the table "mpg_reduced" and "mpg". Which are the differences. 
+
+
+Sometime we want to select the whole table except some columns. We can use "-" for that
+
+```{r}
+select(mpg, -manufacturer)
+```
+
+
+
+## Filter
+
+"filter" selects rows by specifying a condition. For example, the following code selects the cars with a city miles per gallon larger than 30 
+
+```{r}
+filter(mpg, cty > 30)
+```
+
+The following code filters the table so that the remaining table corresponds only to the model "a4" with 4 or more cylinders
+
+```{r}
+filter(mpg, model == "a4", cyl >= 4)
+```
+
+* Reduce the original table to a table that only contains the cars with 8 cylinders 
+
+
+* Is there any audi a4 with engine capacity (displ) larger than 3 litres?
+
+
+* Create a table that contaisn the information of the cars of the year 1999 and that only contains the informatoin of manufacturer, model year and cyl. 
+
+
+## Mutate
+
+"mutate" mutates the table, that is, adds a new column based on the values of other columns,
+
+Let's suppose that the "cty" was measured wrong and that the values are actually  2 units larger. Using "mutate" we can create a new column with the corrected "cty"
+
+```{r}
+mutate(mpg, corrected_cty = cty + 2)
+```
+
+* Create a table named "mpg_corrected" that contains the corrected_cty column, but not the original cty column
+
+
+## Summarise
+
+"summarise" reduce the table to a single row that summarises some operations of the columns. For example
+
+```{r}
+summarise(mpg, mean_cyl = mean(cyl))
+```
+performs the following. Given the table "mpg", it computes the mean value of the cyl value and assings it to a new column call "mean_cyl"
+
+* Use "summarise" to estimate the standard deviation of the variable "cty"
+
+
+"summarise" is often useful when it is applied together with "group_by". See next:
+
+## Grouping
+
+"group_by" tells the table that the operations that we would like to perform on the table should be applied for each differente value of the grouped variable. For example:
+
+```{r}
+mpg2 <- group_by(mpg, year)
+```
+
+"mpg" and "mpg2" is the same table, but "mpg2" is a table in which the operations are going to be performed for each possible value of year 
+
+* Explore "mpg" and "mpg2" to see the differences
+
+Let's see what happens when we perform "summarise" in the grouped table:
+
+```{r}
+summarise(mpg2, mean_cyl = mean(cyl))
+```
+
+Now, the summary has been performed for each subtable specified by a given value of year
+
+* Create a table that contains the standard deviation of "cty" for each possible value of "cyl"
+
+## The pipe operator
+
+This code:
+
+```{r}
+mpg |>  select(year)
+```
+
+is the same that this code:
+
+```{r}
+select(mpg, year)
+```
+
+The "|> " is called the pipe operator. It seems that it is not a big deal, but it is very useful to improve the readibility of  code and avoid the creation of many different variables.  
+
+Consider the following example. We would like to select the columns "manufacturer", "model", "year", "cyl" and "cty". Then, we want to consider only the cars from the year 1999. Finally, we want to look at the average "cyl" for each possible value of "cty". We can do that as follow:
+
+```{r}
+mpg_reduced <- select(mpg, manufacturer, model, year, cyl, cty)
+
+mpg_reduced_1999 <- filter(mpg_reduced, year == 1999)
+
+mpg_reduced_1999_grouped <- group_by(mpg_reduced_1999, cty)
+
+summarise(mpg_reduced_1999_grouped, mean_cyl = mean(cyl))
+```
+
+But with the pipe operator this is  simplified to:
+
+```{r}
+mpg |> 
+  select(manufacturer, model, year, cyl, cty) |> 
+  filter(year == 1999) |> 
+  group_by(cty) |> 
+  summarise(mean_cyl = mean(cyl))
+```
+
+* Select the columns cyl and hwy, and then consider the cars with more than four cylinders (cyl). Estimate the mean "hwy" as a function of the cylinders of the car. Use the pipe operator. 
+

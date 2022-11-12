@@ -26,7 +26,9 @@ The chunk above will include R code. The chunk below will include python code.
 ```
 
 
-* Now, create a chunk below. To do so, you need to place the cursor below these lines and press the green square with a "C" and a plus. 
+* Now, create a chunk below this line. You need to place the cursor below these lines and press the green square with a "C" and a plus. Or even better, use the keyboard short-cut (windows: control + alt + i, mac: cmd + option + i)
+
+
 
 
 ### Executing a code chunk  
@@ -172,13 +174,14 @@ The elements inside a function are called arguments. They have names, but often 
 ```{r}
 mean(x = ages)
 ```
+
 Naming the arguments is very useful when you have a function that have many arguments.
 
 ## Installing R packages 
 
 Often, the default R functions are not enough to perform the data analysis. We will need specialized functions. These functions are located in packages. 
 
-In order to be able to use a package we need to install it. 
+To be able to use a package we need to install it. 
 
 * Install the "quickpsy" package. To do this, click on the "Packages" tab of RStudio and then on "Install". Then a dialog box will appear. In this dialog box, search for "quickpsy" and click the "Install" button.
 
@@ -188,7 +191,7 @@ You only need to install the packages once.
 
 ### Load the packages 
 
-To be able to use a package we need to load it. To load a package we need the function "library":
+To be able to use a package you need to load it. To load a package you need the function "library":
 
 ```{r}
 library(quickpsy)
