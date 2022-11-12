@@ -1,0 +1,206 @@
+---
+title: "R Notebooks, objects, functions and packages"
+output: html_notebook
+---
+
+## R Notebooks
+
+This is a Notebook. It combines text with code to perform data analysis. 
+
+A Notebook can be exported as a pdf, a word document, htlm page... Press "Preview" to see the html. 
+
+The title of the sections are created using "#"
+
+### Chunks
+
+In a notebook, the code to analyze data is placed in gray rectangles like the one below. They are called chunks
+
+```{r}
+
+```
+
+The chunk above will include R code. The chunk below will include python code. 
+
+```{python}
+
+```
+
+
+* Now, create a chunk below. To do so, you need to place the cursor below these lines and press the green square with a "C" and a plus. 
+
+
+### Executing a code chunk  
+
+* To execute the code of the chunk below, press the green play button in the top-right corner of the chunk 
+
+```{r}
+2 + 3 
+```
+
+From now on, you will need to execute all the chunks that follow 
+
+* Create a R chunk that divides 888 by 99. 
+
+
+## Objects in R
+
+### Single values
+
+In R, the operator to assign values to a variable is "<-":
+
+```{r}
+age <- 25
+```
+
+* Execute the chunk below to see which is the value of the variable "age" (remember that you need to execute first the chunk above) :
+
+```{r}
+age
+```
+
+
+### Lists
+
+We can assign a list to a variable instead of a single value. To do so, we need brackets and the letter "c":
+
+```{r}
+ages <- c(26, 27, 28, 22, 24, 35)
+```
+
+* Use the code chunk below, to explore the values of the variable "ages":
+
+```{r}
+
+```
+
+We can also create a list of names, but we need quotation marks in this case:
+
+```{r}
+names <- c("Borja", "Lisa", "Miguel", "Carlos", "Pau", "Daniel")
+```
+
+
+* Explore the variable "names":
+
+```{r}
+
+```
+
+### Tables 
+
+We can also create a table and assign it to a variable
+
+```{r}
+party <- data.frame(names, ages)
+```
+
+* Explore the table "party"
+
+```{r}
+
+```
+
+Tables are the most used objects in R.
+
+We will start all of our analysis with a table. But, we will not create it by hand. The table will be the output file of our software to run the experiment. 
+
+To extract the data from a colunm of a table we need to use the "$" operator
+
+```{r}
+party$ages
+```
+
+* Extract the column "names" from the table "party"
+
+```{r}
+
+```
+
+### List of tables
+
+Finally, we can have a list of tables 
+
+Let's see again what's inside the table "party"
+
+```{r}
+party
+```
+
+Now let's create another table
+
+```{r}
+color <- c("red", "blue")
+max_speed <- c(200, 160)
+
+cars <- data.frame(color, max_speed)
+
+cars
+```
+
+To put the two tables in a list we need to use "list"
+
+```{r}
+my_list <- list(party, cars)
+```
+
+
+* Look at the list of tables called "my_list"
+
+```{r}
+
+```
+
+
+## Functions 
+
+Consider this code:
+
+```{r}
+mean(ages)
+```
+
+* What is doing the function "mean"?
+
+* Knowing that the R function to calculate de standard deviation is "sd", use it to calculate the standard deviation of  "ages":
+
+```{r}
+
+```
+
+The elements inside a function are called arguments. They have names, but often you don't need to explicitly write them. For example, for the function mean, the argument where you place the list of elements for which you want to calculate the mean is called "x". So this is the more explicit call of mean:  
+
+```{r}
+mean(x = ages)
+```
+Naming the arguments is very useful when you have a function that have many arguments.
+
+## Installing R packages 
+
+Often, the default R functions are not enough to perform the data analysis. We will need specialized functions. These functions are located in packages. 
+
+In order to be able to use a package we need to install it. 
+
+* Install the "quickpsy" package. To do this, click on the "Packages" tab of RStudio and then on "Install". Then a dialog box will appear. In this dialog box, search for "quickpsy" and click the "Install" button.
+
+* Install in the same way the "tidyverse" package
+
+You only need to install the packages once. 
+
+### Load the packages 
+
+To be able to use a package we need to load it. To load a package we need the function "library":
+
+```{r}
+library(quickpsy)
+```
+
+
+* Load the "tidyverse":
+
+```{r}
+
+```
+
+The tidyverse contain pretty much all the functions that we will use to perform data analysis.
+
+

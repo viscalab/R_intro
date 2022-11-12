@@ -1,0 +1,91 @@
+---
+title: "Basic table manipulations"
+output: html_notebook
+---
+
+* Load the tidyverse
+
+The tidyverse includes some example tables. Let's consider the table "mpg"
+
+```{r}
+mpg
+```
+The table is too large, so only one part is shown in the notebook. To navigate to other columns you can use the black arrow. To navigate to other rows you can use the 1, 2, 3, ... symbols. 
+
+If you want to see the whole table, you can use "view"
+
+```{r}
+view(mpg)
+```
+
+In the table, each rows presents the data of a given car. This format is called a tidy table because each row correspond to an observation and each column to a given variable (for example the column "cty" describes the fuel economy: means city miles per gallon). Tidy tables are often the best way to organize tables for data analysis. 
+
+To obtain information of a given data set or function you can do:
+
+```{r}
+?mpg
+```
+
+
+
+There are five main operations with tables: select, filter, mutate, summarise and group.
+
+## Select
+
+"select" select columns from a table
+
+```{r}
+select(mpg, year)
+```
+
+* Select the column "cty"
+
+It is possible to select more than one column
+
+```{r}
+select(mpg, year, drv)
+```
+
+Typically you would like to assign the new table with the selected columns to a new variable
+
+```{r}
+mpg_reduced <- select(mpg, year, drv)
+```
+
+
+* Explore the table "mpg_reduced" and "mpg". Which are the differences. 
+
+## Filter
+
+"filter" selects rows by specifying a condition. For example, the following code selects the cars with a city miles per gallon larger than 30 
+
+```{r}
+filter(mpg, cty > 30)
+```
+
+The following code filters the table so that the remaining table corresponds only to the model "a4" with 4 or more cylinders
+
+```{r}
+filter(mpg, model == "a4", cyl >= 4)
+```
+
+* Reduce the original table to a table that only contains the cars with 8 cylinders 
+
+
+* Is there any audi a4 with engine capacity (displ) larger than 3 litres?
+
+
+* Create a table that contaisn the information of the cars of the year 1999 and that only contains the informatoin of manufacturer, model year and cyl. 
+
+
+## Mutate
+
+"mutate" mutates the table, that is, adds a new column based on the values of other columns,
+
+Let's suppose that the "cty" was measured wrong and that the values are actually  ¡2 units larger. Using "mutate" we can create a new column with the corrected "cty"
+
+```{r}
+mutate(mpg, corrected_cty = cty + 2)
+```
+* Create a table that contain the manufacturer
+
