@@ -1,0 +1,34 @@
+---
+title: "Introduction to statistical models in R. Practices"
+format: html
+editor: visual
+---
+
+1.  Create a function that corresponds to the probability densitiy function of a normal distribution with mean 3 and standard deviation of 2 using the algebraic expression. Create another function that corresponds to the same probability density function, but using the R function `dnorm`. Plot the two functions to be sure that they are the same.
+
+
+2.  Let's suppose that the height of men in the Netherlands is normally distributed with a mean of 183 cm and standard deviation of 10.5 cm.
+    -   What is the probability that a Dutch male is shorter than 170 cm?
+
+    -   What is the probability that a Dutch male is taller than 200 cm?
+
+    -   What is the probability that a Dutch male is between 180 and 190 cm?
+
+    -   Out of a random sample of 300 Dutch men, how many would we expect to be taller than 190 cm?
+
+
+3.  Consider the distribution of the heights of men in the Netherlands.
+
+-   Generate a sample of 1000 people and plot how they are distritubuted using an histogram. 
+
+-   Generate 5000 samples in which each sample includes 1000 people. Estimate the sample mean for each sample and plot the distribution of sample means using an histogram. Which are the differences between the distribution of heights in the previous plot and the distribution of sample means?
+
+- Generate 5000 samples, but now of 3000 people each and do the same graph. Which is the difference with the previous graph?
+
+- From the previous 5000 sample means, estimate the standard deviation and check that the standard deviation of the distribution of sample means is about the same to the standard deviation of the original sample divided by the square root of the lenght of the original sample
+
+
+4.  Consider 10 visual neurons whose response is aproximately normally distributed. The response of each neuron is measured for a stimulus moving left or right. The next values indicate, for each neuron, the difference in response for each type of stimulus 8, -3, -2, 1, -7, 10, -6, 0, -8, -2. Is there evidence that these neurons differenciate the two types of stimuli. 
+
+
+

@@ -1,0 +1,922 @@
+---
+title: "Introduction to statistical models in R"
+execute: 
+  echo: true
+format: 
+  revealjs:
+    smaller: true
+    incremental: true
+    chalkboard: true
+editor: visual
+---
+
+# Probability
+
+## Types of variables
+
+-   A non-random variable $y$ is completely specified by a number
+
+. . .
+
+$$y = 20$$
+
+-   A random variable $Y$ could take different values and it is completely specified by a **probability density function (pdf)**
+
+. . .
+
+$$f(y)$$
+
+. . .
+
+The pdf describes the probability of obtaining certain values of the variable.
+
+```{r,message=FALSE, echo=FALSE, fig.width=2, fig.height=2, fig.align='center'}
+library(tidyverse)
+
+set.seed(99)
+
+p_pdf <- tibble(y = rnorm(100, mean = 20, sd = 10)) |> 
+  ggplot(aes(y)) +
+  geom_density() +
+  labs(y = "f(y)") +
+  theme_classic()
+
+p_pdf
+```
+
+------------------------------------------------------------------------
+
+```{r,message=FALSE, echo=FALSE, fig.width=2, fig.height=2, fig.align='center'}
+library(tidyverse)
+
+set.seed(99)
+
+p_pdf <- tibble(y = rnorm(100, mean = 20, sd = 10)) |> 
+  ggplot(aes(y)) +
+  geom_density() +
+  labs(y = "f(y)") +
+  theme_classic()
+
+p_pdf
+```
+
+. . . 
+
+The probability of obtaining certain values of the random variable is
+
+$$P(y_1 < y < y_2) = \int_{y_1}^{y_2} f(y) \, dy$$
+
+. . .
+
+The probability that $Y$ takes a value smaller than $y_1$ is
+
+$$P(y < y_1) = \int_{-\infty}^{y_1} f(y) \, dy$$
+
+. . .
+
+which is called the **cumulative distribution function (cdf)** $F$.
+
+. . .
+
+We can use $F$ to calculate the probability of obtaining certain values of the random variable
+
+$$P(y_1 < y < y_2) = F(y_2) - F(y_1)$$
+
+## Parametric pdfs
+
+Often, we specified pdfs using an algebraic expressions that include several parameters
+
+Example:
+
+$$f(y) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+It is also written as
+
+$$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+This formula specifies a family of parametric functions. When we specify the parameters, the pdf is completely specified
+
+. . .
+
+Example:
+
+$$\mu = 20, \, \sigma = 10$$
+
+$$f(y) = \frac{1}{10 \, \sqrt{2 \pi}} \exp\left(- \frac{(y - 20)^2}{2 \cdot \, 10^2}\right)$$
+
+. . .
+
+```{r}
+f <- function(y) {
+  1 / (10 * sqrt(2 * pi)) * exp(- (y - 20)^2 / (2 * 10^2))
+}
+```
+
+. . .
+
+```{r}
+f(15)
+```
+
+```{r}
+f(30)
+```
+
+------------------------------------------------------------------------
+
+```{r}
+tibble(y = seq(-20, 50, .1))
+```
+
+. . .
+
+```{r}
+tibble(y = seq(-20, 50, .1)) |> 
+  mutate(f_y = f(y))
+```
+
+. . .
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+tibble(y = seq(-20, 50, .1)) |> 
+  mutate(f_y = f(y)) |>   
+  ggplot(aes(y, f_y)) +
+  geom_line() 
+```
+
+## Pdfs included in R
+
+. . .
+
+The previous pdf is called the **normal distribution** and it is already included in R
+
+```{r}
+f <- function(y) {
+  dnorm(y, mean = 20, sd = 10)
+}
+```
+
+. . .
+
+```{r}
+f(15)
+```
+
+. . .
+
+Or we can write it directly
+
+```{r}
+dnorm(15, mean = 20, sd = 10)
+```
+
+. . .
+
+The cdf is also included
+
+```{r}
+pnorm(15, mean = 20, sd = 10)
+```
+
+. . .
+
+And the inverse of the cdf, which is called the **quantile function**, is also included
+
+```{r}
+qnorm(0.3085, mean = 20, sd = 10)
+```
+
+. . .
+
+Finally, it includes a function that given a pdf creates values of the random variable taking into account the pdf
+
+. . .
+
+```{r}
+rnorm(1, mean = 20, sd = 10)
+```
+
+```{r}
+rnorm(1, mean = 20, sd = 10)
+```
+
+## Pdfs included in R
+
+. . .
+
+The convention *d, p, q and r* is used for other distributions.
+
+. . .
+
+Example:
+
+y is distributed following a t-distribution
+
+. . .
+
+```{r}
+dt(0.4, df = 5)
+```
+
+```{r}
+pt(0.4, df = 5)
+```
+
+```{r}
+qt(0.647, df = 5)
+```
+
+```{r}
+rt(1, df = 5)
+```
+
+. . .
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+tibble(y = seq(-5, 5, .1)) |> 
+  mutate(f_y = dt(y, df = 5)) |> 
+  ggplot(aes(y, f_y)) +
+  geom_line()
+```
+
+## Expected values
+
+Given a function of a random variable $g(Y)$, the expected value is
+
+$$E[g(Y)] = \int_{-\infty}^{\infty} g(y) \,f(y) \, dy$$
+
+. . .
+
+Mean: $g(Y) = Y$
+
+. . .
+
+$$E[Y] = \int_{-\infty}^{\infty} y \,f(y) \, dy$$
+
+. . .
+
+The expected value is a number. It does not involve probabilities.
+
+. . .
+
+<br/>
+
+Variance: $g(Y) = (Y - E[Y])^2$
+
+$$E[(Y - E[Y])^2] = \int_{-\infty}^{\infty} (y - E[Y])^2 \,f(y) \, dy$$
+
+. . .
+
+Example: Normal distribution
+
+. . .
+
+$$E[Y] = \int_{-\infty}^{\infty} y \, \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right) \, dy$$
+
+. . .
+
+$$E[Y] = \int_{-\infty}^{\infty} y \, \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right) \, dy  = \mu$$
+
+------------------------------------------------------------------------
+
+. . .
+
+$$E[(Y - E[Y])^2] = \int_{-\infty}^{\infty} (y - \mu)^2 \, \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right) \, dy$$
+
+. . .
+
+$$E[(Y - E[Y])^2] = \int_{-\infty}^{\infty} (y - \mu)^2 \, \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right) \, dy = \sigma^2$$
+
+## The problem of probability
+
+. . .
+
+Given a pdf, calculate certain probabilities or expected values
+
+. . .
+
+Example:
+
+The response of a visual neuron when we display a stimulus of contrast 1% is distributed normally with mean 20 and standard deviation 10. For a given trial, which is the probability that the response of the neuron has a value between 18 and 25.
+
+. . .
+
+```{r}
+pnorm(25, mean = 20, sd = 10) - pnorm(18, mean = 20, sd = 10)
+```
+
+. . .
+
+Which is the average response of the neuron?
+
+. . .
+
+The average response of the neuron is the expected value. So it is 20.
+
+. . .
+
+<br/>
+
+We do not have these problems because we don't know the pdf.
+
+# Statistics
+
+## The problem of statistics
+
+. . .
+
+We have some observations
+
+$$y_1, y_2, \ldots, y_n$$
+
+. . .
+
+Example: The response of a neuron in different trials when a stimulus of contrast 1% is presented.
+
+$$y_1 = 15, y_2 = 50, \ldots, y_n = 5$$
+
+. . .
+
+**We assume that these observations are generated by a pdf. The pdf in the context of statistics is called a statistical model.**
+
+Example:
+
+$$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+### Problem 1: model selection
+
+. . .
+
+Given $y_1, y_2, \ldots, y_n$, which is the pdf that describes better the data
+
+. . .
+
+Example: Given $15, 50, \ldots, 5$, which is better $f_1$ or $f_2$
+
+. . .
+
+$$f_1(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+$$f_2(y; \mu, \gamma) = \frac{1}{\pi \gamma \left[ 1 + \left( \frac{y-\mu}{\gamma} \right)^2 \right]}$$
+
+## Problem 2: estimation
+
+. . .
+
+Given $y_1, y_2, \ldots, y_n$ and a pdf, which are the best values of the parameters (this is called point estimation)
+
+. . .
+
+Example:
+
+Given $y_1 = 15, y_2 = 50, \ldots, y_n = 5$ and
+
+$$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+which are the best $\mu$ and $\sigma$?
+
+. . .
+
+Example:
+
+```{r, fig.width=2, fig.height=2, fig.align='center'}
+#| echo: false
+tibble(y = c(15, 50, 5, 23, 30, 32, 39, 33, 34, 46, 18)) |> 
+  ggplot(aes(x = y, y = 0)) +
+  geom_point() +
+  geom_line(data = tibble(x = seq(0, 80)) |> 
+              mutate(y = dnorm(x, mean = 50, sd = 5)), 
+            aes(x = x, y = y)) +
+    geom_line(data = tibble(x = seq(0, 80)) |> 
+              mutate(y = dnorm(x, mean = 30, sd = 13)), 
+            aes(x = x, y = y)) +
+  labs(y = "f(y)") +
+  theme_classic()
+```
+
+. . .
+
+How do we estimate the best parameters?
+
+. . .
+
+Using the observations (the data)
+
+. . .
+
+## Statistic (statistical estimator)
+
+. . .
+
+An statisitic is any function of the data (the observations)
+
+. . .
+
+Example:
+
+$$\hat{\mu}(y_1, y_2, \ldots, y_n) = \frac{1}{n} \sum_{i=1}^n y_i = \bar{y}$$
+
+. . .
+
+This is called the sample mean.
+
+. . .
+
+$$\hat{\mu} =\frac{1}{30} (15 + 59 + \ldots + 5) = 25.6$$
+
+. . .
+
+Not all the estimators are going to be *good*: $\hat{\mu} = y_1 + y_2$
+
+. . .
+
+## Point estimation depends on the sample
+
+. . .
+
+Let's suppose that we know the pdf: normal with $\mu = 20$ and $\sigma = 10$.
+
+. . .
+
+Let's generate some observations
+
+```{r}
+y <- rnorm(20, mean = 20, sd = 10)
+y
+```
+
+. . .
+
+Now, let's forget about the parameters of the pdf.
+
+Our problem is: given the 20 responses of the neuron, which is a good value for $\mu$
+
+. . .
+
+```{r}
+mean(y)
+```
+
+. . .
+
+The best estimation of $\mu$ changes with the sample
+
+```{r}
+y <- rnorm(20, mean = 20, sd = 10)
+y
+```
+
+. . .
+
+```{r}
+mean(y)
+```
+
+. . .
+
+The sample mean is a random variable. In general, a statistic is a random variable.
+
+## Problem 3: Hypothesis testing
+
+. . .
+
+Given $y_1, y_2, \ldots, y_n$ and a pdf
+
+$$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+which hypothesis (formulated for the parameters) receives more support?
+
+$$H_1: \mu \in M_1$$
+
+$$H_2: \mu \in M_2$$
+
+. . .
+
+Example:
+
+The response of a neuron on each trial is $18, 15, 3, 55, 21, 39$
+
+. . .
+
+$$M_1: \mu < 20$$
+
+$$M_2: \mu \geq 20$$
+
+. . .
+
+We can do two type of errors: choosing $H_1$ when $H_2$ is true or choosing $H_2$ when $H_1$ is true
+
+. . .
+
+How do we choose the hypothesis?
+
+. . .
+
+Using the observations (the data)
+
+## Choosing a hypothesis
+
+-   Calculate an statistic (for different problems we will use different statistics)
+
+-   Select a criterion (a number) depending on the type of error that we want to mimimize
+
+-   Choose $H_1$ when the statistic is smaller than the criterion and choose $H_2$ whent the statistic is larger than the criterion
+
+. . .
+
+Example:
+
+The response of a neuron on each trial is $18, 15, 3, 55, 21, 39$ and the distribution is normal
+
+$$H_1: \mu < 20$$
+
+$$H_2: \mu \geq 20$$
+
+. . .
+
+Statistic
+
+```{r}
+sta <- mean(c(18, 15, 3, 55, 21, 39))
+sta
+```
+
+. . .
+
+Criterion
+
+```{r}
+crit <- 20
+```
+
+. . .
+
+Given that sta \> crit, we choose $H_2$
+
+. . .
+
+If want to minimize the error of selecting $H_2$ when $H_1$ is true we can choose a criterion of, for example, 35.
+
+## Simple hypothesis test
+
+. . .
+
+The previous example is an example of a composite hypothesis test.
+
+. . .
+
+A simple hypothesis test has this form:
+
+$$H_1: \mu = \mu_0$$
+
+$$H_2: \mu \neq  \mu_0$$
+
+. . .
+
+It is more typical to name the hypothesis $H_0$ (it is called the null hypothesis) and $H_1$ (it is called the alternative hypothesis)
+
+$$H_0: \mu = \mu_0$$
+
+$$H_1: \mu \neq  \mu_0$$
+
+. . .
+
+Under $H_0$:
+
+$$f_0(y; \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu_0)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+Under $H_1$:
+
+$$f_1(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . .
+
+It is a special case of Problem 1 (model selection) where one of the pdfs is a special case of the other.
+
+------------------------------------------------------------------------
+
+Example:
+
+. . .
+
+The response of a neuron on each trial is $18, 15, 3, 55, 21, 39$ and the distribution is normal
+
+$$H_0: \mu = 20$$
+
+$$H_1: \mu \neq  20$$
+
+. . .
+
+**Choose the statistic.** For this problem a good one is the t statistic:
+
+$$t = \frac{\bar{y} - 20}{s}\sqrt{n}$$
+
+. . .
+
+```{r}
+y <- c(18, 15, 3, 55, 21, 39)
+
+t_statistic <- (mean(y) - 20) / sd(y) * sqrt(length(y))
+
+t_statistic
+```
+
+. . .
+
+**Choose the criterion.**
+
+. . .
+
+t is a good statistic because if $H_0$ is true, then t is distributed according to t-student distribution with degrees of freedom n - 1
+
+. . .
+
+```{r, fig.width=2, fig.height=1.75, fig.align='center'}
+plot_t_5 <- tibble(t = seq(-5, 5, .1)) |> 
+  mutate(f_t = dt(t, df = 5)) |> 
+  ggplot() +
+  geom_line(aes(t, f_t))
+
+plot_t_5
+```
+
+------------------------------------------------------------------------
+
+$$H_0: \mu = 20$$ $$f_0(y) = \frac{1}{10 \, \sqrt{2 \pi}} \exp\left(- \frac{(y - 20)^2}{2 \cdot \, 10^2}\right)$$
+
+We use $\sigma = 10$, but the result is the same for any value of $\sigma$
+
+. . .
+
+```{r}
+y <- rnorm(6, mean = 20, sd = 10)
+y
+```
+
+. . .
+
+```{r}
+t <- (mean(y) - 20) / sd(y) * sqrt(length(y))
+
+t
+```
+
+. . .
+
+```{r}
+y <- rnorm(6, mean = 20, sd = 10)
+y
+```
+
+. . .
+
+```{r}
+t <- (mean(y) - 20) / sd(y) * sqrt(length(y))
+
+t
+```
+
+------------------------------------------------------------------------
+
+```{r}
+tibble(sample = 1:1000) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(6, mean = 20, sd = 10)) 
+```
+
+. . .
+
+```{r}
+distribution_of_ts <- tibble(sample = 1:10000) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(6, mean = 20, sd = 10)) |> 
+  group_by(sample) |> 
+  summarise(t = (mean(y) - 20) / sd(y) * sqrt(length(y)))
+
+distribution_of_ts |> slice_head(n = 3)
+```
+
+. . .
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+plot_t_5 + 
+  geom_density(data = distribution_of_ts, aes(x = t), color = "red")
+```
+
+------------------------------------------------------------------------
+
+```{r}
+t_statistic
+```
+
+. . .
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 + 
+  geom_vline(xintercept = t_statistic)
+```
+
+We cannot reject $H_0$
+
+. . .
+
+Let's suppose that we have 43, 41, 32, 71, 44, 34
+
+. . .
+
+```{r}
+y2 <- c(43, 41, 32, 71, 44, 34)
+
+new_t_statistic <- (mean(y2) - 20) / sd(y2) * sqrt(length(y2))
+
+```
+
+. . .
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 + 
+  geom_vline(xintercept = new_t_statistic)
+```
+
+
+## Choosing the criterion properly
+
+We choose it in a way that if $H_0$ is true, we choose $H_1$ only 5% of the times. The 5% is called the alpha level
+
+. . . 
+
+```{r}
+qt(.025, df = 5)
+```
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 +
+  geom_ribbon(data = tibble(t = seq(-5, qt(.025, df = 5), .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t),fill = "red"
+                )
+```
+
+. . .
+
+```{r}
+qt(.975, df = 5)
+```
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 +
+    geom_ribbon(data = tibble(t = seq(-5, qt(.025, df = 5), .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) +
+  geom_ribbon(data = tibble(t = seq(qt(.975, df = 5), 5, .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) 
+  
+```
+
+------------------------------------------------------------------------
+
+18, 15, 3, 55, 21, 39
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 +
+    geom_ribbon(data = tibble(t = seq(-5, qt(.025, df = 5), .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) +
+  geom_ribbon(data = tibble(t = seq(qt(.975, df = 5), 5, .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) + 
+  geom_vline(xintercept = t_statistic)
+  
+```
+
+We do not reject $H_0$
+
+. . .
+
+<br/>
+
+43, 41, 32, 71, 44, 34
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 +
+    geom_ribbon(data = tibble(t = seq(-5, qt(.025, df = 5), .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) +
+  geom_ribbon(data = tibble(t = seq(qt(.975, df = 5), 5, .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) + 
+  geom_vline(xintercept = new_t_statistic)
+  
+```
+
+We reject $H_0$
+
+## p-value
+
+It is the smaller alpha for which we reject the null hypothesis
+
+. . . 
+
+43, 41, 32, 71, 44, 34
+
+```{r}
+new_t_statistic
+```
+
+```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| echo: false
+plot_t_5 +
+    geom_ribbon(data = tibble(t = seq(-5, qt(.025, df = 5), .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) +
+  geom_ribbon(data = tibble(t = seq(qt(.975, df = 5), 5, .01)) |>
+                mutate(f_t = dt(t, df = 5)), aes(x = t, ymin = 0, ymax = f_t), fill = "red"
+                ) + 
+  geom_vline(xintercept = new_t_statistic)
+  
+```
+
+```{r}
+2 * ( 1 - pt(new_t_statistic, df = 5))
+```
+
+## We do not need these calculations
+
+. . .
+
+We have these neural responses 43, 41, 32, 71, 44, 34. Is it likely that the distribution is normal with mean 20?
+
+. . . 
+
+```{r}
+t.test(c(43, 41, 32, 71, 44, 34), mu = 20)
+```
+. . . 
+
+It is not likely. 
+
+## Summary
+
+- A statistical model is a family of probability density functions. 
+
+- One problem in statistics is to assess with pdf describes the data better (model selection) 
+
+- Another problem is given a statistical model, which are the parameters that could explain the data best (estimation)
+
+- Another problem is to choose between hypothesis expressed in terms of possible values of the parameters (hypothesis testing)  
+
+## More general models
+
+The random variable $Y$ often depends on another random variable $X$. 
+
+. . . 
+
+
+Example:
+
+The response of a neuron depends on the contrast of the stimulus
+
+```{r, fig.width=2, fig.height=2, fig.align='center'}
+#| echo: false
+
+tibble(x = c(1, 10, 20, 30)) |> 
+  group_by(x) |> 
+  summarise(y = rnorm(6, mean = 10 + x * 1.5, sd = 3), .groups = "keep") |> 
+  ggplot(aes(x = x, y = y )) +
+  geom_point(size = .8) +
+  ylim(0, 75)
+```
+
+. . . 
+
+Previously 
+
+$$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
+
+. . . 
+
+Now
+
+$$f(y; x, \beta_0, \beta_1, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - (\beta_0 + \beta_1 x))^2}{2 \, \sigma^2}\right)$$
+
+
+
+
