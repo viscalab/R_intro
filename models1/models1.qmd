@@ -135,6 +135,8 @@ tibble(y = seq(-20, 50, .1))
 . . .
 
 ```{r}
+#| code-line-numbers: "2"
+
 tibble(y = seq(-20, 50, .1)) |> 
   mutate(f_y = f(y))
 ```
@@ -142,6 +144,8 @@ tibble(y = seq(-20, 50, .1)) |>
 . . .
 
 ```{r, fig.width=3, fig.height=2, fig.align='center'}
+#| code-line-numbers: "3-4"
+
 tibble(y = seq(-20, 50, .1)) |> 
   mutate(f_y = f(y)) |>   
   ggplot(aes(y, f_y)) +
