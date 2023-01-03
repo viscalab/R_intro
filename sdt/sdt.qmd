@@ -1,0 +1,79 @@
+---
+title: "Signal Detection Theory"
+format: 
+  revealjs:
+    smaller: true
+    incremental: true
+editor: visual
+---
+
+## The Yes-No task
+
+. . .
+
+| Stimulus | Response |            Correct?            |
+|:--------:|:--------:|:------------------------------:|
+|    S     |   Yes    |        Correct: **Hit**        |
+|    N     |    No    | Correct: **Correct Rejection** |
+|    S     |    No    |      Incorrect: **Miss**       |
+|    S     |    No    |      Incorrect: **Miss**       |
+|    N     |   Yes    |   Incorrect: **False Alarm**   |
+|    S     |   Yes    |        Correct: **Hit**        |
+
+|              |     |     |
+|:------------:|:---:|:---:|
+|              |  N  |  S  |
+| Yes, it is S |     |     |
+| No, it is N  |     |     |
+
+## Binomial distribution: probability
+
+. . .
+
+A randow variable $Y$ is distributed binomial if the pdf is
+
+$$f(y;n, p) = \binom{n}{y} p^y \, (1-p)^{n-y}$$
+
+-   We have an experiment that has two possible outcomes (head or tail).
+-   We have a probability $p$ that one of the events happens. Let's say 0.8 for heads.
+-   We repeat the experiment $n$ times. Let's say 50.
+
+. . .
+
+$f(y;n, p)$ corresponds to the probability of obtaining $y$ heads.
+
+. . .
+
+For example, the probality of obtaining 25 heads is:
+
+```{r}
+#| echo: true
+dbinom(25, size = 50, prob = 0.8)
+```
+
+Very small
+
+```{r}
+#| echo: true
+dbinom(45, size = 50, prob = 0.8)
+```
+
+## Binomial distribution: statistics
+
+We have the data: tossing a coin 200 times and getting 120 heads.
+
+. . .
+
+Which is the most likely value of the parameter $p$?
+
+. . .
+
+We need to compute a statistic from the data.
+
+. . .
+
+$$\hat{p} = ?$$
+
+. . .
+
+$$\hat{p} = \frac{n_h}{n} = \frac{120}{200} = 0.6$$
