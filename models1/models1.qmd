@@ -60,7 +60,7 @@ p_pdf <- tibble(y = rnorm(100, mean = 20, sd = 10)) |>
 p_pdf
 ```
 
-. . . 
+. . .
 
 The probability of obtaining certain values of the random variable is
 
@@ -756,12 +756,11 @@ plot_t_5 +
   geom_vline(xintercept = new_t_statistic)
 ```
 
-
 ## Choosing the criterion properly
 
 We choose it in a way that if $H_0$ is true, we choose $H_1$ only 5% of the times. The 5% is called the alpha level
 
-. . . 
+. . .
 
 ```{r}
 qt(.025, df = 5)
@@ -837,7 +836,7 @@ We reject $H_0$
 
 It is the smaller alpha for which we reject the null hypothesis
 
-. . . 
+. . .
 
 43, 41, 32, 71, 44, 34
 
@@ -868,31 +867,31 @@ plot_t_5 +
 
 We have these neural responses 43, 41, 32, 71, 44, 34. Is it likely that the distribution is normal with mean 20?
 
-. . . 
+. . .
 
 ```{r}
 t.test(c(43, 41, 32, 71, 44, 34), mu = 20)
 ```
-. . . 
 
-It is not likely. 
+. . .
+
+It is not likely.
 
 ## Summary
 
-- A statistical model is a family of probability density functions. 
+-   A statistical model is a family of probability density functions.
 
-- One problem in statistics is to assess with pdf describes the data better (model selection) 
+-   One problem in statistics is to assess with pdf describes the data better (model selection)
 
-- Another problem is given a statistical model, which are the parameters that could explain the data best (estimation)
+-   Another problem is given a statistical model, which are the parameters that could explain the data best (estimation)
 
-- Another problem is to choose between hypothesis expressed in terms of possible values of the parameters (hypothesis testing)  
+-   Another problem is to choose between hypothesis expressed in terms of possible values of the parameters (hypothesis testing)
 
 ## More general models
 
-The random variable $Y$ often depends on another random variable $X$. 
+The random variable $Y$ often depends on another random variable $X$.
 
-. . . 
-
+. . .
 
 Example:
 
@@ -909,18 +908,14 @@ tibble(x = c(1, 10, 20, 30)) |>
   ylim(0, 75)
 ```
 
-. . . 
+. . .
 
-Previously 
+Previously
 
 $$f(y; \mu, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - \mu)^2}{2 \, \sigma^2}\right)$$
 
-. . . 
+. . .
 
 Now
 
 $$f(y; x, \beta_0, \beta_1, \sigma) = \frac{1}{\sigma \, \sqrt{2 \pi}} \exp\left(- \frac{(y - (\beta_0 + \beta_1 x))^2}{2 \, \sigma^2}\right)$$
-
-
-
-
