@@ -6,8 +6,26 @@ editor: visual
 
 1.  Create a function that corresponds to the probability densitiy function of a normal distribution with mean 3 and standard deviation of 2 using the algebraic expression. Create another function that corresponds to the same probability density function, but using the R function `dnorm`. Plot the two functions to be sure that they are the same.
 
-2.  Let's suppose that the height of men in the Netherlands is normally distributed with a mean of 183 cm and standard deviation of 10.5 cm.
+```{r,message=FALSE}
+library(tidyverse)
 
+f_algebraic <- function(y) {
+  1 / (2 * sqrt(2 * pi)) * exp(- (y - 3)^2 / (2 * 2^2))
+}
+
+f_r <- function(y) {
+  dnorm(y, mean = 3, sd = 2)
+}
+
+tibble(y = seq(-5, 8, .01)) |> 
+  mutate(p_algebraic = f_algebraic(y), 
+         p_r = f_r(y)) |> 
+  ggplot() +
+  geom_line(aes(x = y, y = p_algebraic), color = "red") +
+  geom_line(aes(x = y, y = p_r), color = "blue") 
+```
+
+2.  Let's suppose that the height of men in the Netherlands is normally distributed with a mean of 183 cm and standard deviation of 10.5 cm.
     -   What is the probability that a Dutch male is shorter than 170 cm?
 
     -   What is the probability that a Dutch male is taller than 200 cm?
@@ -15,6 +33,22 @@ editor: visual
     -   What is the probability that a Dutch male is between 180 and 190 cm?
 
     -   Out of a random sample of 300 Dutch men, how many would we expect to be taller than 190 cm?
+
+```{r}
+pnorm(170, mean = 183, sd = 10.5)
+```
+
+```{r}
+1 - pnorm(200, mean = 183, sd = 10.5)
+```
+
+```{r}
+pnorm(190, mean = 183, sd = 10.5) - pnorm(180, mean = 183, sd = 10.5)
+```
+
+```{r}
+(1 - pnorm(190, mean = 183, sd = 10.5)) * 300
+```
 
 3.  Consider the distribution of the heights of men in the Netherlands.
 
@@ -26,4 +60,50 @@ editor: visual
 
 -   From the previous 5000 sample means, estimate the standard deviation and check that the standard deviation of the distribution of sample means is about the same to the standard deviation of the original sample divided by the square root of the lenght of the original sample
 
+```{r}
+tibble(y =  rnorm(1000, mean = 183, sd = 10.5)) |> 
+  ggplot() +
+  geom_histogram(aes(y), bins = 100) 
+```
+
+```{r}
+tibble(sample = 1:5000) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(1000, mean = 183, sd = 10.5), .groups = "keep") |> 
+  group_by(sample) |> 
+  summarise(sample_mean = mean(y), .groups = "keep") |> 
+  ggplot(aes(sample_mean)) +
+  geom_histogram(bins = 100) 
+```
+
+```{r}
+tibble(sample = 1:5000) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(3000, mean = 183, sd = 10.5), .groups = "keep") |> 
+  group_by(sample) |> 
+  summarise(sample_mean = mean(y), .groups = "keep") |> 
+  ggplot(aes(sample_mean)) +
+  geom_histogram(bins = 100)
+```
+
+```{r}
+tibble(sample = 1:5000) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(3000, mean = 183, sd = 10.5), .groups = "keep") |> 
+  group_by(sample) |> 
+  summarise(sample_mean = mean(y), .groups = "keep") |> 
+  ungroup() |> 
+  summarise(sta_dev = sd(sample_mean))
+```
+
+```{r}
+sd(rnorm(3000, mean = 183, sd = 10.5)) / sqrt(3000)
+```
+
 4.  Consider 10 visual neurons whose response is aproximately normally distributed. The response of each neuron is measured for a stimulus moving left or right. The next values indicate, for each neuron, the difference in response for each type of stimulus 8, -3, -2, 1, -7, 10, -6, 0, -8, -2. Is there evidence that these neurons differenciate the two types of stimuli.
+
+```{r}
+y <- c(8, -3, -2, 1, -7, -12, -7, 0, -8, -5)
+
+t.test(y, mu = 0)
+```

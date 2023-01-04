@@ -1,0 +1,631 @@
+---
+title: "Basics of meta-analysis"
+format: 
+  revealjs:
+    smaller: true
+    incremental: true
+    scrollable: true
+editor: visual
+---
+
+## The problem
+
+-   According **Study 1**, *Reducin* reduces blood presure 5.3 mm Hg.
+
+-   According **Study 2**, *Reducin* reduces blood presure 10.1 mm Hg.
+
+-   According **Study 3**, *Reducin* increases blood presure 2.9 mm Hg.
+
+-   ...
+
+. . .
+
+**Which is the effect of taking *Reducin* on blood pressure?**
+
+. . .
+
+## 
+
+**Study 1**
+
+. . .
+
+Blood pressure of 15 people taking *Reducin*
+
+```{r}
+library(tidyverse)
+set.seed(999)
+
+y_drug <- rnorm(15, mean = 140, sd = 30)
+```
+
+```{r,echo=TRUE}
+y_drug
+```
+
+. . .
+
+Blood pressure of 20 people taking placebo
+
+```{r}
+
+y_control <- rnorm(20, mean = 160, sd = 30)
+```
+
+```{r, echo=TRUE}
+y_control
+```
+
+. . .
+
+```{r, echo=TRUE, fig.width=3, fig.height=3, fig.align='center'}
+bind_rows(
+  tibble(y = y_control, cond = "control")
+  ,
+  tibble(y = y_drug, cond = "drug")
+) |> 
+  ggplot(aes(cond, y)) +
+  geom_point()
+```
+
+
+
+
+
+
+## 
+
+**Study 1**
+
+. . .
+
+Blood pressure of 15 people taking *Reducin*
+
+```{r,echo=TRUE}
+y_drug
+```
+
+. . .
+
+Blood pressure of 20 people taking placebo
+
+```{r, echo=TRUE}
+y_control
+```
+
+<br>
+
+. . .
+
+##### Hypothesis testing
+
+$$H_0: \mu_{drug} = \mu_{control} \, \, \, \, \, \, H_1: \mu_{drug} \neq \mu_{control}$$
+
+. . .
+
+*How can I perform this hypothesis test?*
+
+. . .
+
+```{r, echo=TRUE}
+t.test(y_drug, y_control)
+```
+
+## 
+
+**Study 1**
+
+Blood pressure of 15 people taking *Reducin*
+
+```{r,echo=TRUE}
+y_drug
+```
+
+Blood pressure of 20 people taking placebo
+
+```{r, echo=TRUE}
+y_control
+```
+
+<br>
+
+. . .
+
+*Which is the other fundamental problem in statistics?*
+
+. . .
+
+##### Estimation
+
+. . .
+
+*Which is a good estimator of* $\mu_{control}$ and $\mu_{drug}?$
+
+. . .
+
+```{r, echo=TRUE}
+mean(y_control)
+```
+
+. . .
+
+```{r, echo=TRUE}
+mean(y_drug)
+```
+
+. . .
+
+*Which is a good estimator of* $\mu_{control} - \mu_{drug}?$
+
+. . .
+
+```{r, echo=TRUE}
+mean(y_control) - mean(y_drug)
+```
+
+. . .
+
+A comparison of two variables like this is called **effect size** (unstandardized effect size).
+
+##
+
+Leland Wilkinson:
+
+*Always present effect sizes for primary outcomes...If the units of measurement are meaningful on a practical level (e.g., number of cigarettes smoked per day), then we usually prefer an unstandardized measure (regression coefficient or mean difference) to a standardized measure (r or d).*
+
+. . .
+
+But, **standardized measures** are also interesting because:
+
+-   Allow the comparison of different effects: drug for reducing blood pressure with drug to reduce fever. 
+
+-   Meta-analysis tecniques use standardized effect sizes.
+
+. . .
+
+<br>
+
+There are families of standardized effect sizes:
+
+-   Correlation family: pearson's $r$, ...
+
+-   Difference family: Cohen's $d$, Hedges' $g$, ...
+
+## Cohen's $d$
+
+$$d = \frac{\overline{y}_{control} - \overline{y}_{drug}}{s}$$
+
+. . .
+
+**Assuming different standard deviation for the two groups (not common)**
+
+It is recommended to use the standard deviation of the control group for $s$
+
+
+. . .
+
+<br>
+
+
+**Assuming same standard deviation for the two groups (common)**
+
+It is used a weighted average of the standard deviation for $s$ (pooled standard deviation)
+
+. . .
+
+$$s = \sqrt{\frac{(n_{control} -1) s_{control}^2 + (n_{drug} -1) s_{drug}^2 }{n_{control} + n_{drug} - 2}}$$
+
+## Cohen's $d$
+
+. . .
+
+```{r,echo=TRUE}
+y_drug
+```
+
+```{r, echo=TRUE}
+y_control
+```
+
+. . .
+
+
+```{r,echo=TRUE}
+n_drug <- length(y_drug)
+n_drug
+```
+
+```{r,echo=TRUE}
+n_control <- length(y_control)
+n_control
+```
+
+. . .
+
+```{r,echo=TRUE}
+m_drug <- mean(y_drug)
+m_drug
+```
+
+
+```{r,echo=TRUE}
+m_control <- mean(y_control)
+m_control
+```
+
+. . .
+
+```{r,echo=TRUE}
+s_drug <- sd(y_drug)
+s_drug
+```
+
+
+```{r,echo=TRUE}
+s_control <- sd(y_control)
+s_control
+```
+
+
+. . .
+
+```{r,echo=TRUE}
+s <- sqrt( ((n_control - 1) * s_control^2 + (n_drug - 1) * s_drug^2) / (n_control + n_drug - 2))
+s
+```
+
+. . .
+
+```{r,echo=TRUE}
+d <- (m_control - m_drug) / s
+d
+```
+
+## Cohen's $d$
+
+```{r,echo=TRUE}
+d <- (m_control - m_drug) / s
+d
+```
+
+<br>
+
+. . .
+
+**Using the `esc` library**
+
+```{r,echo=TRUE}
+library(esc)
+
+d_esc <- esc_mean_sd(grp1m = m_control, grp2m = m_drug, 
+            grp1sd = s_control, grp2sd = s_drug, 
+            grp1n = n_control, grp2n = n_drug)
+
+d_esc
+```
+<br>
+
+. . .
+
+```{r,echo=TRUE}
+d_esc$es
+```
+
+. . .
+
+**Creating a function**
+
+```{r,echo=TRUE}
+estimate_cohen <- function(y_1, y_2) {
+  n_1 <- length(y_1)
+  n_2 <- length(y_2)
+  
+  m_1 <- mean(y_1)
+  m_2 <- mean(y_2)
+  
+  s_1 <- sd(y_1)
+  s_2 <- sd(y_2) 
+  
+  d <- esc_mean_sd(grp1m = m_1, grp2m = m_2, 
+            grp1sd = s_1, grp2sd = s_2, 
+            grp1n = n_1, grp2n = n_2)
+  
+  d$es
+  
+}
+
+```
+
+<br>
+
+. . . 
+
+```{r,echo=TRUE}
+d_esc <- estimate_cohen(y_control, y_drug)
+d_esc
+```
+
+
+## Hedges' $g$
+
+. . . 
+
+What are we estimating?
+
+. . . 
+
+Blood pressure is distributed normally
+
+-   with mean $\mu_{control}$ and standard deviation $\sigma$ for the drug group
+
+-   with mean $\mu_{drug}$ and standard deviation $\sigma$ for the placebo group
+
+. . . 
+
+We define the population standardized mean difference as
+
+$$\theta = \frac{\mu_{control} - \mu_{drug}}{\sigma}$$
+
+. . . 
+
+$d = \frac{\overline{y}_{control} - \overline{y}_{drug}}{s}$ is an estimator of $\theta$
+
+. . . 
+
+It is good, but there are better ones like $g$
+
+$$g \approx \left( 1- \frac{3}{4 (n_{control} + n_{drug}) - 9}\right) d$$
+
+. . .
+
+```{r,echo=TRUE}
+d
+```
+
+. . .
+
+```{r,echo=TRUE}
+g <- (1 - 4 / (4 * (n_control + n_drug) - 9)) * d # approximate
+g
+```
+
+. . .
+
+Using `esc`
+
+```{r,echo=TRUE}
+esc_mean_sd(grp1m = m_control, grp2m = m_drug, 
+            grp1sd = s_control, grp2sd = s_drug, 
+            grp1n = n_control, grp2n = n_drug, 
+            es.type = "g")
+```
+
+. . .
+
+**Creating a function**
+```{r,echo=TRUE}
+estimate_hedges <- function(y_1, y_2) {
+  n_1 <- length(y_1)
+  n_2 <- length(y_2)
+  
+  m_1 <- mean(y_1)
+  m_2 <- mean(y_2)
+  
+  s_1 <- sd(y_1)
+  s_2 <- sd(y_2) 
+  
+  d <- esc_mean_sd(grp1m = m_1, grp2m = m_2, 
+            grp1sd = s_1, grp2sd = s_2, 
+            grp1n = n_1, grp2n = n_2, 
+            es.type = "g")
+  
+  d$es
+  
+}
+
+```
+
+```{r}
+estimate_hedges(y_control, y_drug)
+```
+
+
+## Why $g$ is better than $d$
+
+Because $g$ is less biased than $d$ 
+
+. . .
+
+The bias (for example, for d) is defined as 
+
+$$bias = E[d]- \theta$$
+
+. . .
+
+An estimator is unbiased when the average value is the same than the value of the parameter.
+
+. . .
+
+Let's perform some simulations to see it
+
+. . .
+
+```{r,echo=TRUE}
+sigma <- 30
+
+mu_control <- 160
+mu_drug <- 140
+```
+
+. . .
+
+<br>
+
+```{r, echo=TRUE}
+theta <- (mu_control - mu_drug) / sigma
+theta
+```
+
+## Why $g$ is better than $d$
+
+. . .
+
+**Sample 1**
+
+```{r,echo=TRUE}
+y_drug_sample_1 <- rnorm(n_drug, mean = mu_drug, sd = sigma)
+y_drug_sample_1
+```
+
+. . .
+
+
+```{r,echo=TRUE}
+y_control_sample_1 <- rnorm(n_control, mean = mu_control, sd = sigma)
+y_control_sample_1
+```
+
+. . .
+
+**Cohen's $d$**
+
+```{r,echo=TRUE}
+estimate_cohen(y_control_sample_1, y_drug_sample_1)
+```
+
+. . .
+
+**Hedges' $g$**
+
+```{r,echo=TRUE}
+estimate_hedges(y_control_sample_1, y_drug_sample_1)
+```
+
+
+## Why $g$ is better than $d$
+
+. . .
+
+**Sample 2**
+
+```{r,echo=TRUE}
+y_drug_sample_2 <- rnorm(n_drug, mean = mu_drug, sd = sigma)
+y_drug_sample_2
+```
+
+. . .
+
+
+```{r,echo=TRUE}
+y_control_sample_2 <- rnorm(n_control, mean = mu_control, sd = sigma)
+y_control_sample_2
+```
+
+. . .
+
+**Cohen's $d$**
+
+```{r,echo=TRUE}
+estimate_cohen(y_control_sample_2, y_drug_sample_2)
+```
+
+. . .
+
+**Hedges' $g$**
+
+```{r,echo=TRUE}
+estimate_hedges(y_control_sample_2, y_drug_sample_2)
+```
+
+## Why $g$ is better than $d$
+
+. . .
+
+**Multiple samples**
+
+```{r,echo=TRUE}
+samples_drug <- tibble(sample = 1:100) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(n_drug, mean = mu_drug, sd = sigma), 
+            .groups = "keep") |> 
+  mutate(cond = "drug")
+samples_drug
+```
+
+<br>
+
+. . .
+
+```{r, echo=TRUE}
+samples_control <- tibble(sample = 1:100) |> 
+  group_by(sample) |> 
+  summarise(y = rnorm(n_control, mean = mu_control, sd = sigma), 
+            .groups = "keep") |> 
+  mutate(cond = "control")
+samples_control
+```
+
+. . .
+
+<br>
+
+```{r, echo=TRUE}
+samples <- samples_drug |> 
+  bind_rows(samples_control)
+```
+
+
+## Why $g$ is better than $d$
+
+```{r}
+samples_1 <- samples |> 
+  filter(sample == 1)
+
+samples_1
+```
+
+. . .
+
+**A function that calculates $d$ and $g$ for a given sample data frame**
+
+```{r,echo=TRUE}
+estimate_eff_size_from_tibble <- function(.data) {
+  y_control <- .data |> 
+    filter(cond == "control") |> 
+    pull("y")
+  
+  y_drug <- .data |> 
+    filter(cond == "drug") |> 
+    pull("y")
+  
+  d <- estimate_cohen(y_control, y_drug)
+  g <- estimate_hedges(y_control, y_drug)
+  
+  tibble(d, g)
+}
+estimate_eff_size_from_tibble(samples_1)
+```
+## Why $g$ is better than $d$
+
+```{r,echo=TRUE}
+distribution_eff_sizes <- samples |> 
+  group_by(sample) |> 
+  summarise(estimate_eff_size_from_tibble(cur_data()))
+```
+
+. . . 
+
+```{r,echo=TRUE}
+distribution_eff_sizes |> 
+  ggplot() +
+  geom_density(aes(x = d, color = "d")) +
+  geom_density(aes(x = g, color = "g")) 
+```
+
+. . . 
+
+```{r}
+distribution_eff_sizes |> 
+  summarise(expected_d = mean(d), expected_g = mean(g))
+```
+
